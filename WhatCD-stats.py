@@ -1,7 +1,12 @@
 """what.cd"""
 import requests
+import zipfile
 #import mechanize
 #import cookielib
+
+
+with zipfile.ZipFile("vitaminK's Snatches.zip", 'r') as myzip:
+    print myzip.namelist()
 
 user = raw_input("username: ")
 passw = raw_input("password: ")
@@ -46,3 +51,5 @@ class WhatAPI:
         self.passkey = accountinfo["response"]["passkey"]
 
 wcd = WhatAPI(username=user,password=passw)
+
+
