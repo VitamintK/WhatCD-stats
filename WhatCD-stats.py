@@ -6,7 +6,10 @@ import zipfile
 
 
 with zipfile.ZipFile("vitaminK's Snatches.zip", 'r') as myzip:
-    print myzip.namelist()
+    torfilenames= myzip.namelist()
+
+for fl in torfilenames:
+    print fl.split('-')[-1].strip('.torrent')
 
 user = raw_input("username: ")
 passw = raw_input("password: ")
