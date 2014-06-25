@@ -86,6 +86,9 @@ class WhatAPI:
         """gets torrent info given torrent id"""
         return self.request("torrent",id=torrent_id)
 
+    def print_tor_info(self,torrent_id):
+        print json.dumps(self.get_tor_info(torrent_id),indent=4,separators=(',',':'))
+
 wcd = WhatAPI(username=user,password=passw)
 
 tor_ids = [fl.split('-')[-1].strip('.torrent') for fl in torfilenames if fl!=u'Summary.txt']
