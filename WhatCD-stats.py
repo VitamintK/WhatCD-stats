@@ -1,6 +1,7 @@
 """what.cd"""
 import requests
 import zipfile
+import json
 #import mechanize
 #import cookielib
 
@@ -8,19 +9,30 @@ import zipfile
 with zipfile.ZipFile("vitaminK's Snatches.zip", 'r') as myzip:
     torfilenames= myzip.namelist()
 
-for fl in torfilenames:
-    print fl.split('-')[-1].strip('.torrent')
-
 user = raw_input("username: ")
 passw = raw_input("password: ")
-payload = {'username':user, 'password':passw, 'keeplogged': 1, 'login': 'Login'}
-test = requests.post("https://ssl.what.cd/login.php",payload)
-print test.text
-print test.cookies
+#payload = {'username':user, 'password':passw, 'keeplogged': 1, 'login': 'Login'}
+#test = requests.post("https://ssl.what.cd/login.php",payload)
+#print test.text
+#print test.cookies
 
-print "--------- here starts it ----------"
-index = requests.get("http://what.cd/ajax.php?action=index",cookies=test.cookies)
-print index.text
+#print "--------- here starts it ----------"
+#index = requests.get("http://what.cd/ajax.php?action=index",cookies=test.cookies)
+#print index.text
+
+#I should probably have written this myself
+#but someone already wrote a nice wrapper
+#for the what.cd json api
+#here https://github.com/isaaczafuta/whatapi/blob/master/whatapi/whatapi.py
+
+headers = {
+    'Content-type': 'application/x-www-form-urlencoded',
+    'Accept-Charset': 'utf-8',
+    'User-Agent': 'whatapi [isaaczafuta]'
+    }
+
+class RequestException(Exception):
+    pass
 
 class WhatAPI:
     def __init__(self, config=None, username=None, password=None):
@@ -53,6 +65,33 @@ class WhatAPI:
         self.authkey = accountinfo["response"]["authkey"]
         self.passkey = accountinfo["response"]["passkey"]
 
+    def request(self, action, **kwargs):
+        '''Makes an AJAX request at a given action page'''
+        ajaxpage = 'https://ssl.what.cd/ajax.php'
+        params = {'action': action}
+        if self.authkey:
+            params['auth'] = self.authkey
+        params.update(kwargs)
+
+        r = self.session.get(ajaxpage, params=params, allow_redirects=False)
+        try:
+            json_response = r.json()
+            if json_response["status"] != "success":
+                raise RequestException
+            return json_response
+        except ValueError:
+            raise RequestException
+    
+    def get_tor_info(self, torrent_id):
+        """gets torrent info given torrent id"""
+        return self.request("torrent",id=torrent_id)
+
 wcd = WhatAPI(username=user,password=passw)
 
+tor_ids = [fl.split('-')[-1].strip('.torrent') for fl in torfilenames if fl!=u'Summary.txt']
 
+for i in tor_ids:
+    try:
+        print wcd.get_tor_info(i)['response']['group']['name']
+    except RequestException:
+        print "{0} didn't work".format(i)
