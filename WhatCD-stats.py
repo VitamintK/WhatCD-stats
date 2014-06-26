@@ -93,8 +93,16 @@ wcd = WhatAPI(username=user,password=passw)
 
 tor_ids = [fl.split('-')[-1].strip('.torrent') for fl in torfilenames if fl!=u'Summary.txt']
 
-for i in tor_ids:
+for i in tor_ids[-10:]:
+    print "\n"
     try:
-        print wcd.get_tor_info(i)['response']['group']['name']
+        tor_info = wcd.get_tor_info(i)
+        print tor_info['response']['group']['name']
+        #wcd.print_tor_info
+        for i in tor_info['response']['group']['musicInfo']:
+            print "{0} --------------".format(i)
+            print tor_info['response']['group']['musicInfo'][i]
     except RequestException:
         print "{0} didn't work".format(i)
+
+#to-do: rate limiting on api requests
