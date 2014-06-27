@@ -100,8 +100,11 @@ for i in tor_ids[-10:]:
         print tor_info['response']['group']['name']
         #wcd.print_tor_info
         for i in tor_info['response']['group']['musicInfo']:
-            print "{0} --------------".format(i)
-            print tor_info['response']['group']['musicInfo'][i]
+            if i!='producer':
+                musicians = tor_info['response']['group']['musicInfo'][i]
+                if musicians!=[]:
+                    print "{0} --------------".format(i)
+                    print musicians
     except RequestException:
         print "{0} didn't work".format(i)
 
